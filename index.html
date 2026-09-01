@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taller de Lecciones Aprendidas — Vicepresidencia de Proyectos de Codelco</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; color: #1a2636; min-height: 100vh; }
+  .page-wrap { max-width: 900px; margin: 0 auto; padding: 24px 16px 60px; }
+  .header { background: #001B66; color: #fff; border-radius: 10px 10px 0 0; padding: 24px 28px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .header .text-left { flex: 1 1 auto; text-align: left; }
+  .header .logo-stack { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .header .logo-stack img { height: 40px; width: auto; display: block; }
+  .header .company { font-size: 20px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; opacity: .95; margin-bottom: 6px; }
+  .header .subtitle { font-size: 16px; font-weight: 600; opacity: .9; margin-bottom: 4px; }
+  .header h1 { font-size: 13px; font-weight: 600; opacity: .8; }
+  @media(max-width:640px){
+    .header { flex-direction: column; text-align: center; }
+    .header .text-left { text-align: center; }
+    .header .logo-stack { flex-direction: row; }
+    .header .logo-stack img { height: 32px; }
+  }
+
+  .progress-bar-outer { background: #001B66; padding: 18px 32px; border-radius: 0 0 10px 10px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+  .progress-track { background: #ffffff; border-radius: 6px; height: 8px; overflow: hidden; }
+  .progress-fill { background: #ED6B0A; height: 100%; transition: width .3s; }
+  .progress-label { color: #ffffff; font-size: 12px; font-weight: 600; margin-top: 8px; display: flex; justify-content: space-between; }
+
+  .expert-box { background: #fff; border: 1.5px solid #c5d5e8; border-radius: 8px; padding: 20px 24px; margin: 16px 0; }
+  .expert-box h3 { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: #555; margin-bottom: 14px; }
+  .expert-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  @media(max-width:640px){ .expert-grid { grid-template-columns: 1fr; } }
+  .field-group label { display: block; font-size: 12px; font-weight: 600; color: #444; margin-bottom: 4px; }
+  .field-group input { width: 100%; border: 1.5px solid #b9c6fa; border-radius: 5px; padding: 8px 10px; font-size: 14px; background: #fffdf5; }
+  .field-group input:focus { outline: none; border-color: #001B66; background: #fff; }
+
+  .btn-start { background: #ED6B0A; color: #fff; border: none; border-radius: 6px; padding: 13px 26px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 6px; }
+  .btn-start:hover { background: #c65a09; }
+  .btn-start:disabled { background: #b9c6fa; cursor: not-allowed; }
+
+  .step-card { background: #fff; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,.08); padding: 28px 32px; margin-top: 0; }
+
+  .summary-box { background: #fff; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,.08); padding: 32px; text-align: center; }
+  .summary-box h2 { color: #001B66; font-size: 20px; margin-bottom: 10px; }
+  .summary-box p { color: #555; font-size: 14px; margin-bottom: 20px; }
+
+  #toast { position: fixed; bottom: 30px; right: 24px; background: #001B66; color: #fff; padding: 14px 22px; border-radius: 8px; font-size: 14px; display: none; box-shadow: 0 4px 16px rgba(0,0,0,.2); z-index: 999; }
+  #toast.show { display: block; animation: fadeIn .3s; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+  .hidden { display: none !important; }
+
+  /* ===== LECCIONES APRENDIDAS (selección múltiple) ===== */
+  .drivers-header { margin-bottom: 18px; }
+  .drivers-header h2 { color: #001B66; font-size: 19px; margin-bottom: 6px; }
+  .drivers-header p { color: #555; font-size: 13.5px; line-height: 1.5; }
+  .drivers-counter { display: inline-block; margin-top: 10px; background: #e8ecfe; border: 1.5px solid #b9c6fa; color: #001B66; font-weight: 700; font-size: 12.5px; padding: 5px 14px; border-radius: 20px; }
+  .drivers-counter.full { background: #fbe7e7; border-color: #AF1414; color: #AF1414; }
+  .driver-list { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+  .driver-item { display: flex; align-items: center; gap: 14px; border: 1.5px solid #b9c6fa; border-radius: 8px; padding: 14px 16px; cursor: pointer; background: #fff; transition: all .15s; user-select: none; }
+  .driver-item:hover { border-color: #ED6B0A; background: #eef1ff; }
+  .driver-item.selected { border-color: #001B66; background: #dbe3fb; }
+  .driver-item.disabled { opacity: .45; cursor: not-allowed; }
+  .driver-item.disabled:hover { border-color: #b9c6fa; background: #fff; }
+  .driver-checkbox { flex: 0 0 auto; width: 24px; height: 24px; border-radius: 6px; border: 2px solid #b9c6fa; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: #fff; }
+  .driver-item.selected .driver-checkbox { background: #001B66; border-color: #001B66; }
+  .driver-num { flex: 0 0 auto; font-size: 12px; font-weight: 800; color: #999; width: 18px; }
+  .driver-item.selected .driver-num { color: #001B66; }
+  .driver-label { flex: 1 1 auto; font-size: 14.5px; font-weight: 600; color: #1a2636; line-height: 1.4; }
+  .driver-item.selected .driver-label { color: #001B66; }
+  .drivers-nav { display: flex; justify-content: flex-end; margin-top: 24px; }
+
+  .custom-add-box { display: flex; gap: 10px; margin-top: 16px; align-items: center; }
+  .custom-add-box input { flex: 1 1 auto; border: 1.5px dashed #b9c6fa; border-radius: 8px; padding: 11px 14px; font-size: 14px; font-family: inherit; background: #fffdf5; }
+  .custom-add-box input:focus { outline: none; border-color: #001B66; background: #fff; border-style: solid; }
+  .btn-add-custom { flex: 0 0 auto; background: #e8ecfe; color: #001B66; border: 1.5px dashed #b9c6fa; border-radius: 8px; padding: 11px 18px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  .btn-add-custom:hover { background: #dbe3fb; border-color: #001B66; }
+  .custom-added-note { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; background: #e8ecfe; border: 1.5px solid #5271FF; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #001B66; }
+  .custom-added-note .remove-link { color: #AF1414; font-weight: 700; cursor: pointer; text-decoration: underline; font-size: 12.5px; white-space: nowrap; margin-left: 12px; }
+  .driver-item.custom-item { border-style: dashed; }
+  .driver-item.custom-item .driver-num { color: #ED6B0A; }
+
+  /* ===== MODO FACILITADOR (local) ===== */
+  .fac-toggle-btn { position: fixed; top: 12px; right: 12px; z-index: 1000; background: #1a2636; color: #cfe2f3; border: 1px solid #445; border-radius: 20px; padding: 7px 14px; font-size: 12px; cursor: pointer; opacity: .85; }
+  .fac-toggle-btn:hover { opacity: 1; }
+  .facilitator-panel { background: #c7d1fb; color: #001B66; border-radius: 10px; padding: 18px 22px; margin: 0 0 20px; box-shadow: 0 2px 14px rgba(0,0,0,.1); border: 2px solid #5271FF; }
+  .facilitator-panel .fac-title { font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; color: #001B66; font-weight: 800; margin-bottom: 10px; }
+  .facilitator-panel .fac-step { font-size: 14px; margin-bottom: 12px; color: #001B66; }
+  .facilitator-panel .fac-step b { color: #001B66; }
+  .fac-authorize-btn { width: 100%; background: #ED6B0A; color: #fff; border: none; border-radius: 8px; padding: 14px; font-size: 14px; font-weight: 800; letter-spacing: .5px; cursor: pointer; text-transform: uppercase; }
+  .fac-authorize-btn:hover { background: #c65a09; }
+  .fac-authorize-btn:disabled { background: #a6b6f5; color: #eef1ff; cursor: not-allowed; }
+  .fac-secondary-actions { display: flex; gap: 8px; margin-top: 10px; }
+  .fac-secondary-btn { flex: 1 1 auto; background: rgba(255,255,255,.5); color: #001B66; border: 1.5px solid #5271FF; border-radius: 8px; padding: 9px; font-size: 12px; font-weight: 700; cursor: pointer; }
+  .fac-secondary-btn:hover { background: #ffffff; }
+  .fac-secondary-btn.fac-danger { border-color: #AF1414; color: #AF1414; }
+  .fac-secondary-btn.fac-danger:hover { background: #fbe7e7; }
+  #fac-preview .results-section { margin-top: 14px; margin-bottom: 0; }
+  #fac-preview .bar-label { color: #001B66; }
+
+  /* ===== OVERLAY DE RESULTADOS ===== */
+  .results-overlay { position: fixed; inset: 0; background: rgba(0,27,102,.55); z-index: 1500; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .results-box { background: #fff; border-radius: 12px; max-width: 640px; width: 100%; max-height: 85vh; overflow-y: auto; box-shadow: 0 8px 30px rgba(0,0,0,.3); }
+  .results-header { background: #001B66; color: #fff; padding: 16px 22px; border-radius: 12px 12px 0 0; display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 15px; position: sticky; top: 0; }
+  .results-close { cursor: pointer; font-size: 16px; opacity: .8; }
+  .results-close:hover { opacity: 1; }
+  .results-body { padding: 20px 24px 28px; }
+  .results-section { margin-bottom: 26px; }
+  .results-section h4 { color: #001B66; font-size: 13px; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; border-bottom: 2px solid #e8ecfe; padding-bottom: 6px; }
+  .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .bar-label { flex: 0 0 42%; font-size: 12.5px; color: #1a2636; line-height: 1.3; }
+  .bar-track { flex: 1 1 auto; background: #e8ecfe; border-radius: 5px; height: 18px; overflow: hidden; position: relative; }
+  .bar-fill { background: #ED6B0A; height: 100%; border-radius: 5px 0 0 5px; transition: width .3s; }
+  .bar-count { flex: 0 0 24px; font-size: 12px; font-weight: 800; color: #001B66; text-align: right; }
+  .results-empty { color: #888; font-size: 13px; font-style: italic; }
+  .locked-msg { text-align: center; margin-top: 18px; padding: 12px; background: #f3f0e0; border: 1.5px dashed #cbb; border-radius: 8px; color: #7a6a20; font-weight: 700; font-size: 13px; }
+
+</style>
+</head>
+<body>
+
+<button class="fac-toggle-btn" id="fac-toggle-btn" onclick="toggleFacilitatorMode()">🔒 Modo Facilitador</button>
+
+<div class="page-wrap">
+
+  <div id="facilitator-panel" class="facilitator-panel hidden">
+    <div class="fac-title">Panel del Facilitador</div>
+    <div class="fac-step">Paso actual: <b id="fac-current-step">—</b></div>
+    <button class="fac-authorize-btn" id="fac-authorize-btn" onclick="authorizeStep()">🔓 Autorizar avanzar</button>
+    <div id="fac-preview"></div>
+    <div class="fac-secondary-actions">
+      <button class="fac-secondary-btn" onclick="showResultsPanel()">📊 Ver resultados</button>
+      <button class="fac-secondary-btn fac-danger" onclick="resetAllData()">🗑 Reiniciar todo (pruebas)</button>
+    </div>
+  </div>
+
+  <div id="results-overlay" class="results-overlay hidden">
+    <div class="results-box">
+      <div class="results-header">
+        <span>📊 Resultados en vivo</span>
+        <span class="results-close" onclick="hideResultsPanel()">✕</span>
+      </div>
+      <div id="results-body" class="results-body"></div>
+    </div>
+  </div>
+
+  <div class="header">
+    <div class="text-left">
+      <div class="company">Vicepresidencia de Proyectos de Codelco</div>
+      <div class="subtitle">Ingeniería de Detalles: &quot;Proyecto Sistema de Agua Recirculada (SAR)&quot;</div>
+      <h1>Taller de Lecciones Aprendidas</h1>
+    </div>
+    <div class="logo-stack">
+      <img src="data:image/png;base64,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" alt="Codelco">
+      <img src="data:image/png;base64,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" alt="Vicepresidencia de Proyectos de Codelco">
+      <img src="data:image/png;base64,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" alt="Conectaria">
+    </div>
+  </div>
+
+  <div id="participant-flow">
+
+  <div class="progress-bar-outer" id="progress-bar-outer">
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    <div class="progress-label"><span id="progress-text">Paso 1 de 4</span><span id="progress-pct">0%</span></div>
+  </div>
+
+  <!-- PANTALLA 1: Datos del Participante -->
+  <div id="screen-intro" class="expert-box">
+    <h3>Datos del Participante</h3>
+    <div class="expert-grid">
+      <div class="field-group"><label>Nombre completo</label><input type="text" id="exp-nombre" placeholder="Ingrese su nombre"></div>
+      <div class="field-group"><label>Cargo / Rol</label><input type="text" id="exp-cargo" placeholder="Ej: Jefe de Proyecto"></div>
+      <div class="field-group"><label>Empresa / Área</label><input type="text" id="exp-empresa" placeholder="Ej: Codelco División Andina"></div>
+    </div>
+    <button class="btn-start" id="btn-start" onclick="startSession()">Comenzar</button>
+  </div>
+
+  <!-- PANTALLA 1B: Registro exitoso / esperando inicio de votación -->
+  <div id="screen-waiting" class="expert-box hidden" style="text-align:center;">
+    <h3>✔ Registro exitoso</h3>
+    <p>Su registro fue guardado correctamente. Continuaremos con el taller en unos instantes.</p>
+    <div class="locked-msg" style="margin-top:18px;">🔒 Esperando que el facilitador dé inicio a la votación</div>
+  </div>
+
+  <!-- PANTALLA 2: Lecciones Aprendidas -->
+  <div id="screen-drivers" class="step-card hidden">
+    <div class="drivers-header">
+      <h2>Lecciones Aprendidas</h2>
+      <p>Seleccione, sin restricciones, las lecciones aprendidas que considere relevantes para el proyecto.</p>
+      <div class="drivers-counter" id="drivers-counter">0 seleccionadas</div>
+    </div>
+    <div class="driver-list" id="driver-list"></div>
+    <div id="driver-custom-area"></div>
+    <div class="drivers-nav">
+      <button class="btn-start" id="btn-drivers-continue" onclick="continueFromDrivers()">Continuar</button>
+    </div>
+    <div class="locked-msg hidden" id="drivers-locked-msg">🔒 Esperando autorización del facilitador</div>
+  </div>
+
+  <!-- PANTALLA 2B: Resultados de Lecciones Aprendidas -->
+  <div id="screen-drivers-results" class="step-card hidden">
+    <div class="drivers-header">
+      <h2>📊 Resultados — Lecciones Aprendidas</h2>
+      <p>Esto es lo que votó el grupo hasta ahora.</p>
+    </div>
+    <div id="drivers-results-body"></div>
+    <div class="drivers-nav">
+      <button class="btn-start" id="btn-drivers-results-continue" onclick="continueFromDriversResults()">✔ Finalizar</button>
+    </div>
+    <div class="locked-msg hidden" id="drivers-results-locked-msg">🔒 Esperando autorización del facilitador</div>
+  </div>
+
+  <!-- PANTALLA FINAL -->
+  <div id="screen-final" class="summary-box hidden">
+    <h2>✔ Proceso completado</h2>
+    <p>Gracias por su participación en el taller.</p>
+  </div>
+
+  </div><!-- /participant-flow -->
+
+</div>
+<div id="toast"></div>
+
+<script>
+/* ===================== CONEXIÓN CON GOOGLE SHEETS ===================== */
+
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzgIlNbnMZasuLEB7Fw-w1QNFzy7PLH6CmbRUitRix6icVw7jBcDml0vtg1trSpLWHh9w/exec';
+
+/* ===================== DATOS FIJOS ===================== */
+
+const DRIVERS = [
+  { id: 460, label: 'Gestión de restricciones ambientales' },
+  { id: 501, label: 'Talleres de constructibilidad e integración de ingeniería' },
+  { id: 579, label: 'Gestión temprana y actualización de permisos sectoriales' },
+  { id: 1522, label: 'Recursos y capacidades para AWP' },
+  { id: 1565, label: 'Definición de servidumbres' },
+  { id: 1575, label: 'Alcances de modelación BIM' },
+  { id: 1587, label: 'Aprendizajes en la implementación del CAPEX Trending' },
+  { id: 1601, label: 'Gestión de permisos sectoriales' },
+  { id: 1611, label: 'Contratación de contratos de construcción' }
+];
+
+const TOTAL_STEPS = 4;
+
+/* ===================== ESTADO ===================== */
+
+let participantInfo = { nombre: '', cargo: '', empresa: '' };
+
+let identificationDone = false;
+let registrationAckDone = false;
+
+let selectedDrivers = [];
+let driversSelectionDone = false;
+let driversResultsDone = false;
+
+let isFacilitatorMode = false;
+let serverUnlockedStep = 0;
+const FACILITATOR_PASSWORD = 'FACILITADOR';
+const STEP_NAMES = {
+  2: 'Continuar tras registro (habilitar votación)',
+  3: 'Lecciones Aprendidas (votación)',
+  4: 'Resultados — Lecciones Aprendidas'
+};
+
+/* ===================== UTILIDADES ===================== */
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+function currentStepNumber() {
+  if (!identificationDone) return 1;
+  if (!registrationAckDone) return 2;
+  if (!driversSelectionDone) return 3;
+  if (!driversResultsDone) return 4;
+  return 5;
+}
+
+function updateProgress() {
+  const step = currentStepNumber();
+  const pct = Math.round(((step - 1) / TOTAL_STEPS) * 100);
+  document.getElementById('progress-text').textContent = `Paso ${step} de ${TOTAL_STEPS}`;
+  document.getElementById('progress-pct').textContent = pct + '%';
+  document.getElementById('progress-fill').style.width = pct + '%';
+}
+
+/* ===================== MODO FACILITADOR (sincronizado con Sheets) ===================== */
+
+function toggleFacilitatorMode() {
+  if (isFacilitatorMode) {
+    isFacilitatorMode = false;
+    document.getElementById('facilitator-panel').classList.add('hidden');
+    document.getElementById('fac-toggle-btn').textContent = '🔒 Modo Facilitador';
+    renderAll();
+    return;
+  }
+  const pwd = prompt('Ingrese la contraseña del Modo Facilitador:');
+  if (pwd === null) return;
+  if (pwd === FACILITATOR_PASSWORD) {
+    isFacilitatorMode = true;
+    document.getElementById('facilitator-panel').classList.remove('hidden');
+    document.getElementById('fac-toggle-btn').textContent = '🔓 Salir Modo Facilitador';
+    renderAll();
+  } else {
+    showToast('⚠ Contraseña incorrecta.');
+  }
+}
+
+function nextUnlockTarget() {
+  // El facilitador no llena el formulario, así que su "paso" no se mide
+  // por su propio avance local sino por el avance global ya autorizado.
+  // El paso 1 (Datos del Participante) nunca requiere autorización.
+  return serverUnlockedStep < 2 ? 2 : serverUnlockedStep + 1;
+}
+
+async function authorizeStep() {
+  const step = nextUnlockTarget();
+  if (step > TOTAL_STEPS) return;
+  const authBtn = document.getElementById('fac-authorize-btn');
+  if (authBtn) authBtn.disabled = true;
+  try {
+    await fetch(SHEET_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'authorize_step', step, password: FACILITATOR_PASSWORD })
+    });
+    serverUnlockedStep = Math.max(serverUnlockedStep, step);
+    showToast('✅ Paso autorizado para todos los participantes.');
+  } catch (e) {
+    console.error('Error autorizando paso:', e);
+    showToast('⚠ No se pudo conectar con el servidor. Revisa SHEET_URL.');
+  }
+  renderAll();
+}
+
+function renderFacilitatorPanel() {
+  if (!isFacilitatorMode) return;
+  const target = nextUnlockTarget();
+  const finished = target > TOTAL_STEPS;
+  document.getElementById('fac-current-step').textContent = finished
+    ? 'Taller finalizado'
+    : (STEP_NAMES[target] || '—');
+  const authBtn = document.getElementById('fac-authorize-btn');
+  authBtn.disabled = finished;
+  authBtn.textContent = finished ? '✓ Todos los pasos autorizados' : '🔓 Autorizar avanzar';
+
+  renderFacilitatorPreview();
+}
+
+function applyStepLock(btnId, msgId) {
+  const btn = document.getElementById(btnId);
+  const msg = document.getElementById(msgId);
+  if (!btn || !msg) return;
+  const unlocked = serverUnlockedStep >= currentStepNumber();
+  btn.disabled = !unlocked;
+  msg.classList.toggle('hidden', unlocked);
+}
+
+async function pollState() {
+  if (!SHEET_URL || SHEET_URL.indexOf('PEGA_AQUI') !== -1) return;
+  try {
+    const res = await fetch(SHEET_URL + '?action=get_state');
+    const data = await res.json();
+    if (typeof data.unlockedStep === 'number' && data.unlockedStep !== serverUnlockedStep) {
+      serverUnlockedStep = data.unlockedStep;
+      renderAll();
+    }
+  } catch (e) {
+    console.error('Error consultando estado:', e);
+  }
+}
+
+/* ===================== RESULTADOS EN VIVO ===================== */
+
+function renderBarSection(title, items, maxItems) {
+  const heading = title ? `<h4>${title}</h4>` : '';
+  if (!items || items.length === 0) {
+    return `<div class="results-section">${heading}<div class="results-empty">Aún no hay respuestas.</div></div>`;
+  }
+  const shown = items.slice(0, maxItems || items.length);
+  const maxCount = Math.max.apply(null, shown.map(i => i.count)) || 1;
+  const rows = shown.map(i => {
+    const pct = Math.round((i.count / maxCount) * 100);
+    return `
+      <div class="bar-row">
+        <div class="bar-label">${i.label}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+        <div class="bar-count">${i.count}</div>
+      </div>`;
+  }).join('');
+  return `<div class="results-section">${heading}${rows}</div>`;
+}
+
+async function showResultsPanel() {
+  if (!SHEET_URL || SHEET_URL.indexOf('PEGA_AQUI') !== -1) {
+    showToast('⚠ Configura primero SHEET_URL para ver resultados.');
+    return;
+  }
+  const overlay = document.getElementById('results-overlay');
+  const body = document.getElementById('results-body');
+  overlay.classList.remove('hidden');
+  body.innerHTML = '<div class="results-empty">Cargando…</div>';
+
+  try {
+    const driversRes = await fetch(SHEET_URL + '?action=get_drivers_summary').then(r => r.json());
+
+    body.innerHTML = renderBarSection('Lecciones Aprendidas más votadas', driversRes.items);
+  } catch (e) {
+    console.error('Error cargando resultados:', e);
+    body.innerHTML = '<div class="results-empty">⚠ No se pudo conectar con el servidor.</div>';
+  }
+}
+
+function hideResultsPanel() {
+  document.getElementById('results-overlay').classList.add('hidden');
+}
+
+let facilitatorPreviewLoading = false;
+
+async function renderFacilitatorPreview() {
+  const box = document.getElementById('fac-preview');
+  if (!box) return;
+  if (!SHEET_URL || SHEET_URL.indexOf('PEGA_AQUI') !== -1) {
+    box.innerHTML = '';
+    return;
+  }
+
+  // Determina qué resumen mostrar según qué fase ya se autorizó.
+  let action = null;
+  let title = '';
+  if (serverUnlockedStep >= 4) { action = 'get_drivers_summary'; title = 'Lecciones Aprendidas más votadas'; }
+
+  if (!action) { box.innerHTML = ''; return; }
+  if (facilitatorPreviewLoading) return;
+  facilitatorPreviewLoading = true;
+
+  try {
+    const res = await fetch(SHEET_URL + '?action=' + action);
+    const data = await res.json();
+    box.innerHTML = renderBarSection(title, data.items);
+  } catch (e) {
+    console.error('Error cargando vista previa:', e);
+  }
+  facilitatorPreviewLoading = false;
+}
+
+async function resetAllData() {
+  if (!SHEET_URL || SHEET_URL.indexOf('PEGA_AQUI') !== -1) {
+    showToast('⚠ Configura primero SHEET_URL.');
+    return;
+  }
+  const ok = confirm('¿Seguro que quieres borrar TODOS los datos y reiniciar el avance a 0? Esto es para pruebas antes del taller real y no se puede deshacer.');
+  if (!ok) return;
+
+  try {
+    await fetch(SHEET_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'reset_all', password: FACILITATOR_PASSWORD })
+    });
+    serverUnlockedStep = 0;
+    showToast('🗑 Datos reiniciados. Recarga la página en todos los dispositivos.');
+    renderAll();
+  } catch (e) {
+    console.error('Error reiniciando datos:', e);
+    showToast('⚠ No se pudo conectar con el servidor.');
+  }
+}
+
+/* ===================== PANTALLA 1: IDENTIFICACIÓN ===================== */
+
+async function startSession() {
+  const nombre  = document.getElementById('exp-nombre').value.trim();
+  const cargo   = document.getElementById('exp-cargo').value.trim();
+  const empresa = document.getElementById('exp-empresa').value.trim();
+  if (!nombre || !cargo || !empresa) { showToast('⚠ Complete los datos del participante.'); return; }
+
+  participantInfo = { nombre, cargo, empresa };
+  identificationDone = true;
+  renderAll();
+
+  try {
+    await fetch(SHEET_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'submit_inscripcion', nombre, cargo, empresa })
+    });
+  } catch (e) {
+    console.error('Error guardando inscripción:', e);
+  }
+}
+
+/* ===================== PANTALLA 2: LECCIONES APRENDIDAS ===================== */
+
+let customDriverText = '';
+
+function toggleDriver(id) {
+  const idx = selectedDrivers.indexOf(id);
+  if (idx >= 0) {
+    selectedDrivers.splice(idx, 1);
+  } else {
+    selectedDrivers.push(id);
+  }
+  renderDriversScreen();
+}
+
+function addCustomDriver() {
+  const input = document.getElementById('custom-driver-input');
+  const val = input.value.trim();
+  if (!val) { showToast('⚠ Escriba la lección que desea agregar.'); return; }
+  customDriverText = val;
+  renderDriversScreen();
+}
+
+function removeCustomDriver() {
+  const idx = selectedDrivers.indexOf('custom_driver');
+  if (idx >= 0) selectedDrivers.splice(idx, 1);
+  customDriverText = '';
+  renderDriversScreen();
+}
+
+async function continueFromDrivers() {
+  if (serverUnlockedStep < currentStepNumber()) { showToast('⚠ Esperando autorización del facilitador.'); return; }
+  if (selectedDrivers.length === 0) { showToast('⚠ Seleccione al menos 1 lección aprendida.'); return; }
+  driversSelectionDone = true;
+  renderAll();
+
+  try {
+    await fetch(SHEET_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'submit_drivers',
+        nombre: participantInfo.nombre,
+        labels: selectedDrivers.map(driverLabelById)
+      })
+    });
+  } catch (e) {
+    console.error('Error guardando drivers:', e);
+  }
+}
+
+function continueFromDriversResults() {
+  if (serverUnlockedStep < currentStepNumber()) { showToast('⚠ Esperando autorización del facilitador.'); return; }
+  driversResultsDone = true;
+  renderAll();
+  document.getElementById('progress-fill').style.width = '100%';
+  document.getElementById('progress-text').textContent = `Paso ${TOTAL_STEPS} de ${TOTAL_STEPS}`;
+  document.getElementById('progress-pct').textContent = '100%';
+}
+
+async function renderDriversResultsScreen() {
+  const body = document.getElementById('drivers-results-body');
+  applyStepLock('btn-drivers-results-continue', 'drivers-results-locked-msg');
+  if (!SHEET_URL || SHEET_URL.indexOf('PEGA_AQUI') !== -1) return;
+  try {
+    const res = await fetch(SHEET_URL + '?action=get_drivers_summary');
+    const data = await res.json();
+    body.innerHTML = renderBarSection('', data.items);
+  } catch (e) {
+    console.error('Error cargando resultados de drivers:', e);
+    body.innerHTML = '<div class="results-empty">⚠ No se pudo conectar con el servidor.</div>';
+  }
+}
+
+function renderDriversScreen() {
+  const list = document.getElementById('driver-list');
+  list.innerHTML = '';
+  const fullList = customDriverText
+    ? DRIVERS.concat([{ id: 'custom_driver', label: customDriverText }])
+    : DRIVERS;
+
+  fullList.forEach((d, idx) => {
+    const isCustom = d.id === 'custom_driver';
+    const isSelected = selectedDrivers.includes(d.id);
+    const item = document.createElement('div');
+    item.className = 'driver-item' + (isSelected ? ' selected' : '') + (isCustom ? ' custom-item' : '');
+    item.innerHTML = `
+      <div class="driver-checkbox">${isSelected ? '✓' : ''}</div>
+      <div class="driver-num">${isCustom ? '+' : idx + 1}</div>
+      <div class="driver-label">${d.label}</div>
+    `;
+    item.onclick = () => toggleDriver(d.id);
+    list.appendChild(item);
+  });
+
+  const counter = document.getElementById('drivers-counter');
+  counter.textContent = `${selectedDrivers.length} seleccionada${selectedDrivers.length === 1 ? '' : 's'}`;
+
+  const customArea = document.getElementById('driver-custom-area');
+  if (customDriverText) {
+    customArea.innerHTML = `
+      <div class="custom-added-note">
+        <span>✓ Lección agregada: <b>${customDriverText}</b></span>
+        <span class="remove-link" onclick="removeCustomDriver()">Quitar</span>
+      </div>
+    `;
+  } else {
+    customArea.innerHTML = `
+      <div class="custom-add-box">
+        <input type="text" id="custom-driver-input" maxlength="120" placeholder="¿Falta una lección aprendida? Escríbala aquí...">
+        <button class="btn-add-custom" onclick="addCustomDriver()">+ Agregar</button>
+      </div>
+    `;
+  }
+
+  applyStepLock('btn-drivers-continue', 'drivers-locked-msg');
+}
+
+function driverLabelById(id) {
+  if (id === 'custom_driver') return customDriverText;
+  const found = DRIVERS.find(d => d.id === id);
+  return found ? found.label : String(id);
+}
+
+/* ===================== RENDER PRINCIPAL ===================== */
+
+function renderAll() {
+  document.getElementById('participant-flow').classList.toggle('hidden', isFacilitatorMode);
+  if (isFacilitatorMode) {
+    renderFacilitatorPanel();
+    return;
+  }
+
+  document.getElementById('screen-intro').classList.toggle('hidden', identificationDone);
+
+  const showWaiting = identificationDone && !registrationAckDone;
+  document.getElementById('screen-waiting').classList.toggle('hidden', !showWaiting);
+  if (showWaiting) {
+    if (serverUnlockedStep >= 2) {
+      registrationAckDone = true;
+      renderAll();
+      return;
+    }
+    updateProgress();
+    return;
+  }
+
+  const showDrivers = identificationDone && registrationAckDone && !driversSelectionDone;
+  document.getElementById('screen-drivers').classList.toggle('hidden', !showDrivers);
+  if (showDrivers) renderDriversScreen();
+
+  const showDriversResults = identificationDone && driversSelectionDone && !driversResultsDone;
+  document.getElementById('screen-drivers-results').classList.toggle('hidden', !showDriversResults);
+  if (showDriversResults) renderDriversResultsScreen();
+
+  const showFinal = identificationDone && driversSelectionDone && driversResultsDone;
+  document.getElementById('screen-final').classList.toggle('hidden', !showFinal);
+
+  updateProgress();
+}
+
+renderAll();
+pollState();
+setInterval(pollState, 3000);
+</script>
+</body></html>
